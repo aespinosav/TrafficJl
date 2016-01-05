@@ -1,16 +1,5 @@
+Module Traffic
 using Graphs, Convex, SCS
-
-A = [0 2
-     0 0]
-
-a = [1, 0.5]
-b = [1, 3]
-
-OD = [0 1
-      0 0]
-
-
-
 
 
 """
@@ -84,63 +73,6 @@ function make_urban_graph(A, a, b, OD)
     g = graph(vlist, elist)
 end
 
-
-
-"""
-Makes a graph where the vertices have coordinates as well as their OD attributes
-
-Care must be taken in the ordering of the pos_list coordinates, they have to be consistent 
-with the ordering in the adjacency matrix.
-"""
-function make_urban_geometric_graph(A, a, b, pos_list, OD)
-    n = size(A)[1]
-    
-    #Generate vertex list and assing OD attributes
-    vlist = [ExVertex(i, "") for i=1:n]
-    
-v_counter = 1
-    for v in vlist
-        v.attributes = AttributeDict([("Pos", pos_list[v_counter]), ("O" ,Int[]), ("D", Int[])])
-        v_counter += 1
-    end
-    
-#Assign OD values to nodes...    
-    flows_counter = 1
-    
-    for i in 1:n
-        for j in 1:n
-            if OD[i,j] != 0
-                
-                push!(vlist[i].attributes["O"], flows_counter)
-                push!(vlist[j].attributes["D"], flows_counter)
-                flows_counter += 1
-            end
-        end
-    end
-    
-    #Generate edge list and assign cost attributes
-    elist = ExEdge[]
-    e_counter = 1
-    
-    for i in 1:n
-        for j in 1:n
-            if A[i,j] != 0
-                for k =1:A[i,j]
-                    
-                    push!(elist, ExEdge(e_counter, vlist[i], vlist[j]) )
-                    e_counter += 1
-                end
-            end
-        end
-    end
-    
-    for i in 1:length(elist)
-        
-        elist[i].attributes = AttributeDict([("a" , a[i]), ("b" , b[i])])
-    end
-    
-    g = graph(vlist, elist)
-end
 
 """
 Constructs and returns the incidence matrix of g. An n x m matrix where n is the nummber of 
@@ -229,6 +161,7 @@ function make_ta_problem(g, OD, q, regime="UE")
     return problem, x 
 end
 
+
 """
 Returns solutions to the traffic assignment problem for a given range of demands: q_range.
 Calls function make_ta_problem
@@ -246,3 +179,6 @@ function ta_solve(g, OD, q_range, regime="UE")
     return sols
 end 
 
+export make_urban_graph, incidence_matrix, ta_solve
+
+end
